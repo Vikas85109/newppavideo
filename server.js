@@ -23,14 +23,14 @@ app.get("/", (req, rsp) => {
 });
 
 app.get("/room", (req, res) => {
-  res.render("room", { roomId: req.query.room });
+  res.render("room", { roomId: req.query.room, username: req.query.username });
 });
 
 io.on("connection", (socket) => {
-  socket.on("join-room", (roomId, userId) => {
+  socket.on("join-room", (roomId, username, userId) => {
 
     socket.join(roomId);
-    socket.to(roomId).broadcast.emit("user-connected", userId);
+    socket.to(roomId).broadcast.emit("user-connected", {userId, username});
 
     socket.on("message", (message) => {
       io.to(roomId).emit("createMessage", message);
@@ -38,7 +38,12 @@ io.on("connection", (socket) => {
 
     socket.on("mute-status-changed", (muted, userId ) => {
       console.log(muted);
-      socket.to(roomId).emit("update-mute-status", { muted, userId });
+      io.to(roomId).emit("update-mute-status", { muted, userId });
+    });
+    
+
+    socket.on("leavemeeting", (userId) => {
+      io.to(roomId).emit("user-leaved-meeting",  userId);
     });
   });
 

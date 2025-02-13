@@ -3,6 +3,7 @@ const chatInputBox = document.getElementById("chat_message");
 const all_messages = document.getElementById("all_messages");
 const main__chat__window = document.getElementById("main__chat__window");
 const videoGrid = document.getElementById("video-grid");
+const username = document.getElementById("username").value;
 const myVideo = document.createElement("video");
 myVideo.muted = true;
 
@@ -28,19 +29,26 @@ navigator.mediaDevices
   .then((stream) => {
     myVideoStream = stream;
     const myVideoDiv = addStreamDiv();
-    addVideoStream(myVideoDiv, stream);
+    addVideoStream(myVideoDiv, stream, peer.id, username);
 
     peer.on("call", (call) => {
-      call.answer(stream);
+      call.answer(stream, {
+        metadata: {
+          name: username
+        }
+      });
       const video = addStreamDiv();
-
+      const reamname = call.metadata.name;
+      console.log(reamname);
       call.on("stream", (userVideoStream) => {
-        addVideoStream(video, userVideoStream, call.peer);
+        addVideoStream(video, userVideoStream, call.peer, reamname);
       });
     });
 
-    socket.on("user-connected", (userId) => {
-      connectToNewUser(userId, stream);
+    socket.on("user-connected", (data) => {
+      const userId = data.userId;
+      const name = data.username;
+      connectToNewUser(userId, stream, name);
     });
 
     document.addEventListener("keydown", (e) => {
@@ -51,7 +59,6 @@ navigator.mediaDevices
     });
 
     socket.on("createMessage", (msg) => {
-      console.log(msg);
       let li = document.createElement("li");
       li.innerHTML = msg;
       all_messages.append(li);
@@ -60,15 +67,25 @@ navigator.mediaDevices
 
 
     socket.on("update-mute-status", ({ muted, userId }) => {
-      console.log("Mute status update received:", { muted });
       user = muted.userId
-      console.log(muted);
       let userDiv = document.getElementById(user);
       if (userDiv) {
-        console.log('find');
         userDiv.innerText = muted.muted;
       }
     });
+
+    socket.on('user-leaved-meeting', (userId) => {
+      console.log(userId);
+      let userDiv = document.getElementById(userId);
+      console.log(userDiv);
+      if (userDiv) {
+        let parentDiv = userDiv.closest('.videos_data');
+        if (parentDiv) {
+          console.log('re');
+          parentDiv.remove();
+        }
+      }
+    })
 
   });
 
@@ -76,8 +93,14 @@ peer.on("call", function (call) {
   getUserMedia(
     { video: true, audio: true },
     function (stream) {
-      call.answer(stream); // Answer the call with an A/V stream.
+      call.answer(stream, {
+        metadata: {
+          name: username
+        }
+      }); // Answer the call with an A/V stream.
+      console.log();
       const video = addStreamDiv();
+      const name = call.metadata.name;
       call.on("stream", function (remoteStream) {
         addVideoStream(video, remoteStream, call.peer);
       });
@@ -89,26 +112,29 @@ peer.on("call", function (call) {
 });
 
 peer.on("open", (id) => {
-  socket.emit("join-room", ROOM_ID, id);
+  socket.emit("join-room", ROOM_ID, USERNAME, id);
 });
 
 // CHAT
 
-const connectToNewUser = (userId, streams) => {
-  var call = peer.call(userId, streams);
-  console.log(call.peer);
+const connectToNewUser = (userId, streams, name) => {
+  var call = peer.call(userId, streams, {
+    metadata: {
+      name: name
+    }
+  });
   var video = addStreamDiv();
   call.on("stream", (userVideoStream) => {
     console.log(userVideoStream);
-    addVideoStream(video, userVideoStream, call.peer);
+    addVideoStream(video, userVideoStream, call.peer, name);
   });
 };
 
-const addVideoStream = (videoContainer, stream, peerid) => {
+const addVideoStream = (videoContainer, stream, peerid, streamuser) => {
 
   if (!peerid) {
-      console.log('not');
-      peerid = peer.id; 
+    //console.log('not');//
+    peerid = peer.id;
   }
 
   const videoEl = videoContainer.querySelector("video");
@@ -119,11 +145,12 @@ const addVideoStream = (videoContainer, stream, peerid) => {
   }
 
   videoEl.srcObject = stream;
+  videoEl.setAttribute('data-stream-id', stream.id);
   const streamIdDiv = videoContainer.querySelectorAll(".user_name")[0]; // First div for stream ID
   const muteStatusDiv = videoContainer.querySelectorAll(".user_name")[1]; // Second div for mute status
 
   // Set the stream ID in the first div
-  streamIdDiv.innerText = peerid;
+  streamIdDiv.innerText = streamuser;
 
 
   // Function to update mute status
@@ -184,6 +211,7 @@ const playStop = () => {
   }
 };
 
+//mute unmute 
 const muteUnmute = () => {
   const enabled = myVideoStream.getAudioTracks()[0].enabled;
   const myMuteStatusDiv = document.querySelector("#video-grid .videos_data:first-child .user_name:nth-child(3)");
@@ -226,7 +254,7 @@ const setMuteButton = () => {
 };
 
 
-
+//add new video due
 const addStreamDiv = () => {
   // Create the parent div for the videos
   const videosDataDiv = document.createElement('div');
@@ -237,22 +265,27 @@ const addStreamDiv = () => {
   // Set the video source here, if available
   videosDataDiv.appendChild(videoElement);
 
-  // Create the first user name div
   const userName1Div = document.createElement('div');
   userName1Div.classList.add('user_name');
-  userName1Div.textContent = 'Umesh Kumar'; // You can set dynamic user name if needed
+  userName1Div.textContent = 'Umesh Kumar';
   videosDataDiv.appendChild(userName1Div);
 
-  // Create the second user name div for "Mute/Unmute"
   const userName2Div = document.createElement('div');
   userName2Div.classList.add('user_name');
-  userName2Div.textContent = 'Mute/Unmute'; // You can make this dynamic as well
+  userName2Div.textContent = 'Mute/Unmute';
   videosDataDiv.appendChild(userName2Div);
 
   return videosDataDiv;
-  // Append the whole structure to the body (or another element in your document)
-  //videoGrid.appendChild(videosDataDiv);
 
+}
+
+
+
+//leavemeeting 
+const leaveMeeting = () => {
+
+  window.location.href = 'http://localhost:3030/';
+  socket.emit("leavemeeting", peer.id);
 }
 
 

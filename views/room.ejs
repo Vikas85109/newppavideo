@@ -14,9 +14,11 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
       const ROOM_ID = "<%= roomId %>";
+      const USERNAME = "<%= username %>";
     </script>
   </head>
   <body>
+    <input type="hidden" id="username" value="<%= username %>" >
     <div class="main">
       <div class="main__left">
         <div class="main__videos">
@@ -58,7 +60,7 @@
           </div>
 
           <div class="main__controls_block">
-            <div class="main__controls_button leaveMeeting" id="leave-meeting">
+            <div class="main__controls_button leaveMeeting" onclick="leaveMeeting()">
               <i class="fa fa-times"></i>
               <span class="">Leave Meeting</span>
             </div>
