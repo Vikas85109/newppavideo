@@ -17,6 +17,15 @@ app.use("/peerjs", peerServer);
 app.get("/", (req, res) => {
   res.render("joincall");
 });
+app.get("/gmeet", (req, res) => {
+  res.render("gmeet");
+});
+app.get("/screenshare", (req, res) => {
+  res.render("screenshare");
+});
+app.get("/meetingjoin", (req, res) => {
+  res.render("meetingjoin");
+});
 
 app.get("/", (req, rsp) => {
   rsp.redirect(`/${uuidv4()}`);

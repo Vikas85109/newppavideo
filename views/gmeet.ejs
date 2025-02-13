@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Meet-Vikas Sharma Scrum Meeting Call</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background-color: #202124;
+      color: white;
+    }
+
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      padding: 20px;
+    }
+
+    .video-tile {
+      background: #3C4043;
+      border-radius: 10px;
+      text-align: center;
+      padding: 10px;
+      position: relative;
+    }
+
+    .mute-icon {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: white;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 5px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .initials {
+      width: 100px;
+      height: 100px;
+      background-color: gray;
+      border-radius: 50%;
+      font-size: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: auto;
+      font-weight: bold;
+      transition: opacity 0.3s;
+    }
+
+    .muted {
+      opacity: 0.5;
+    }
+
+    .bottom-controls {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 10px;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+     .bottom-controls button {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      background-color: #5F6368;
+      border: none;
+      font-size: 18px;
+    }
+
+    div > button{
+      width: 46px;
+    }
+
+     .bottom-controls .btn-danger {
+      background-color: #EA4335;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container-fluid">
+    <h5 class="text-center mt-3">Vikas Sharma Scrum Meeting Call</h5>
+
+    <!-- Video Grid -->
+    <div class="video-grid">
+      <% let users=[ { name: "Ahmed Hashmi" },{ name: "Mukesh Kumar" }, { name: "Rudhir Ingale" }, {
+        name: "Vikas Sharma" }, { name: "Vicky Sharma" }, { name: "Angel Priya" }, { name: "Rudhir Ingale" }, {
+        name: "Vikas Sharma" }, { name: "Vicky Sharma" }, { name: "Angel Priya" } , ]; %>
+
+        <% users.forEach((user, index)=> { %>
+          <div class="video-tile" id="user-<%= index %>">
+            <div class="initials muted" id="initials-<%= index %>">
+              <%= user.name.charAt(0) %>
+            </div>
+            <p>
+              <%= user.name %>
+            </p>
+            <span class="mute-icon" id="mute-<%= index %>">
+              <i class="fas fa-microphone-slash"></i>
+            </span>
+          </div>
+          <% }); %>
+    </div>
+
+    <!-- Bottom Controls -->
+    <div class="bottom-controls">
+      <button class="btn btn-light" id="global-mute" ">
+        <i class=" fas fa-microphone-slash"></i>
+      </button>
+      <button class="btn btn-light"><i class="fa-solid fa-video-slash"></i></button>
+      <button class="btn btn-light"><i class="fa-solid fa-arrow-up-from-bracket"></i></button>
+      <button class="btn btn-light"><i class="fa-solid fa-comment"></i></button>
+      <!-- <button class="btn btn-light"><i class="fa-solid fa-users"></i></button> -->
+      <button class="btn btn-light position-relative">
+        <i class="fa-solid fa-users"></i>
+        <span class="badge  position-absolute top-0 start-100 translate-middle" id="user-count"
+          style="background-color: #5F6368;">10</span>
+      </button>
+      <button class="btn btn-danger hangup-btn">
+        <i class="fa-solid fa-phone"></i>
+      </button>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+
+
+
+</body>
+
+</html>
